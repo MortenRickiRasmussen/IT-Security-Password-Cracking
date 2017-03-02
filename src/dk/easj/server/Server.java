@@ -19,7 +19,7 @@ public class Server implements Runnable {
     }
 
     private ServerSocket serverSocket;
-    private ArrayList<Socket> sockets;
+    private ArrayList<Connection> sockets;
     private boolean running;
 
     public Server() {
@@ -38,6 +38,7 @@ public class Server implements Runnable {
                 Socket socket = serverSocket.accept();
                 Connection slave = new Connection(this, socket);
                 slave.start();
+                sockets.add(slave);
             }
         } catch (IOException ex) {
             System.out.println(ex);
