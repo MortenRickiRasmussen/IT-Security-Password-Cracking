@@ -25,12 +25,14 @@ public class Server implements Runnable {
     private List<UserInfo> passwordFile;
     private List<String> dictionary;
     private int linesSend = 0;
+    private ArrayList<UserInfoClearText> result;
 
     public Server() {
         try {
             slaves = new ArrayList<>();
             dictionary = new ArrayList<>();
             passwordFile = new ArrayList<>();
+            result = new ArrayList<>();
             readPasswordFile();
             readDictionary();
         } catch (IOException e) {
@@ -58,14 +60,14 @@ public class Server implements Runnable {
                 System.out.println("Connected");
                 Slave slave = new Slave(this, socket);
                 startSlave(slave);
+                slave.start();
             }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    public void startSlave(Slave slave) {
-        slave.start();
+    public synchronized void startSlave(Slave slave) {
         slave.getMessage(getChunk());
         slave.getMessage(this.passwordFile);
         slaves.add(slave);
@@ -90,14 +92,20 @@ public class Server implements Runnable {
         try {
             fileReader = new FileReader("webster-dictionary.txt");
             BufferedReader dictionary = new BufferedReader(fileReader);
-            while (dictionary.readLine() != null) {
-                this.dictionary.add(dictionary.readLine());
+            String line;
+            while ((line = dictionary.readLine()) != null) {
+                this.dictionary.add(line);
             }
+            System.out.println(this.dictionary.size());
         } finally {
             if (fileReader != null) {
                 fileReader.close();
             }
         }
+    }
+
+    public synchronized void addResult(ArrayList<UserInfoClearText> result){
+        this.result.addAll(result);
     }
 
 
