@@ -1,9 +1,6 @@
 package dk.easj.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -19,11 +16,11 @@ public class Server implements Runnable {
     }
 
     private ServerSocket serverSocket;
-    private ArrayList<Connection> sockets;
+    private ArrayList<Slave> slaves;
     private boolean running;
 
     public Server() {
-        sockets = new ArrayList<>();
+        slaves = new ArrayList<>();
     }
 
     public void run() {
@@ -36,12 +33,26 @@ public class Server implements Runnable {
 
             while (running) {
                 Socket socket = serverSocket.accept();
-                Connection slave = new Connection(this, socket);
+                Slave slave = new Slave(this, socket);
                 slave.start();
-                sockets.add(slave);
+                slaves.add(slave);
             }
         } catch (IOException ex) {
             System.out.println(ex);
+        }
+    }
+
+    public void serverStop() {
+        running = false;
+
+        try {
+            for (Slave slave : slaves) {
+                slave.disconnect();
+            }
+            slaves.clear();
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

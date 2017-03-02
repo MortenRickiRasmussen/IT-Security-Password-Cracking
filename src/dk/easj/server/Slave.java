@@ -10,14 +10,14 @@ import java.net.Socket;
 /**
  * Created by morty on 07-09-16.
  */
-public class Connection extends Thread {
+public class Slave extends Thread {
 
     private Socket socket;
     private PrintWriter output;
     private BufferedReader input;
     private Server server;
 
-    public Connection(Server server, Socket socket) throws IOException {
+    public Slave(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
 
@@ -36,6 +36,18 @@ public class Connection extends Thread {
         } catch (IOException e) {
             /*When socket closes an exception is thrown
             Therefore do nothing when that happens*/
+        }
+    }
+
+    public void disconnect() throws IOException {
+        if (output != null) {
+            output.close();
+        }
+        if (input != null) {
+            input.close();
+        }
+        if (socket.isConnected()) {
+            socket.close();
         }
     }
 
