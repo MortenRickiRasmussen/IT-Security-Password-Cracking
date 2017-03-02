@@ -1,6 +1,8 @@
 package dk.easj.server;
 
 import com.sun.xml.internal.ws.util.StringUtils;
+import dk.easj.client.UserInfo;
+import dk.easj.client.UserInfoClearText;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -40,31 +42,7 @@ public class CrackerCentralized {
      * @param args the command line arguments, not used
      */
     public void main(String[] args) throws IOException {
-        long startTime = System.currentTimeMillis();
-
-        List<UserInfo> userInfos = PasswordFileHandler.readPasswordFile("passwords.txt");
-        List<UserInfoClearText> result = new ArrayList<UserInfoClearText>();
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader("webster-dictionary.txt");
-            BufferedReader dictionary = new BufferedReader(fileReader);
-            while (true) {
-                String dictionaryEntry = dictionary.readLine();
-                if (dictionaryEntry == null) {
-                    break;
-                }
-                List<UserInfoClearText> partialResult = checkWordWithVariations(dictionaryEntry, userInfos);
-                result.addAll(partialResult);
-            }
-        } finally {
-            if (fileReader != null) {
-                fileReader.close();
-            }
-        }
-        long endTime = System.currentTimeMillis();
-        long usedTime = endTime - startTime;
-        System.out.println(result);
-        System.out.println("Used time: " + usedTime / 1000 + " seconds = " + usedTime / 60000.0 + " minutes");
+        
     }
 
     /**
@@ -74,7 +52,7 @@ public class CrackerCentralized {
      * @param dictionaryEntry a single word from a dictionary, i.e. a possible password
      * @param userInfos       a list of user information records: username + encrypted password
      */
-    List<UserInfoClearText> checkWordWithVariations(String dictionaryEntry, List<UserInfo> userInfos) {
+    private ArrayList<UserInfoClearText> checkWordWithVariations(String dictionaryEntry, List<UserInfo> userInfos) {
         List<UserInfoClearText> result = new ArrayList<UserInfoClearText>();
 
         String possiblePassword = dictionaryEntry;
@@ -123,7 +101,7 @@ public class CrackerCentralized {
      * @param possiblePassword a single dictionary entry (may include a single variation)
      * @return the user information record, if the dictionary entry matches the users password, or {@code  null} if not.
      */
-    List<UserInfoClearText> checkSingleWord(List<UserInfo> userInfos, String possiblePassword) {
+    private List<UserInfoClearText> checkSingleWord(List<UserInfo> userInfos, String possiblePassword) {
         byte[] digest = messageDigest.digest(possiblePassword.getBytes());
         List<UserInfoClearText> results = new ArrayList<UserInfoClearText>();
         for (UserInfo userInfo : userInfos) {

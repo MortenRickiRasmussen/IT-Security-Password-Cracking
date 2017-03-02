@@ -1,4 +1,6 @@
-package dk.easj.server;
+package dk.easj.client;
+
+import sun.misc.BASE64Encoder;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
@@ -7,11 +9,10 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
-import sun.misc.BASE64Encoder;
 
 /**
  * Various utilites useful to create and read a password file
+ *
  * @author andersb
  */
 public class PasswordFileHandler {
@@ -20,12 +21,12 @@ public class PasswordFileHandler {
 
     /**
      * Writes a liste of usernames and encrypted and encoded (BASE64) passwords to a file
-     * @param filename the name of the file
+     *
+     * @param filename  the name of the file
      * @param usernames the list of usernames
      * @param passwords the list of passwords (not encrypted, yet)
      * @throws NoSuchAlgorithmException if the encryption algorithm does not exist
-     * @throws IOException if there was an IOException, relating to the file
-     * @throws FileNotFoundException
+     * @throws IOException              if there was an IOException, relating to the file
      */
     public static void writePasswordFile(final String filename, final String[] usernames, final String[] passwords) throws NoSuchAlgorithmException, IOException {
         final MessageDigest messageDigest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
@@ -50,23 +51,24 @@ public class PasswordFileHandler {
 
     /**
      * Returns a List of UserInfo records from the specified password file
+     *
      * @param filename the name of the password file
      * @return a List of UserInfo records from the specified password file
      * @throws IOException if something bad happens while reading the file
      */
-    public static List<UserInfo> readPasswordFile(final String filename) throws IOException {
+    public static ArrayList<UserInfo> readPasswordFile(String filename) throws IOException {
         FileReader fileReader = null;
         try {
             fileReader = new FileReader(filename);
-            final BufferedReader bufferedReader = new BufferedReader(fileReader);
-            final List<UserInfo> result = new ArrayList<UserInfo>();
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            ArrayList<dk.easj.client.UserInfo> result = new ArrayList<dk.easj.client.UserInfo>();
             while (true) {
-                final String line = bufferedReader.readLine();
+                String line = bufferedReader.readLine();
                 if (line == null) {
                     break;
                 }
-                final String[] parts = line.split(":");
-                final UserInfo userInfo = new UserInfo(parts[0], parts[1]);
+                String[] parts = line.split(":");
+                UserInfo userInfo = new UserInfo(parts[0], parts[1]);
                 result.add(userInfo);
             }
             return result;

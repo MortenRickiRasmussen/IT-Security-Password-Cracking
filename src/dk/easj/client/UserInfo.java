@@ -1,4 +1,4 @@
-package dk.easj.server;
+package dk.easj.client;
 
 import sun.misc.BASE64Decoder;
 
