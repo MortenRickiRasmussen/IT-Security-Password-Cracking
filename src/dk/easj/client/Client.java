@@ -1,7 +1,5 @@
 package dk.easj.client;
 
-import com.sun.xml.internal.ws.util.StringUtils;
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -45,10 +43,7 @@ public class Client {
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
-
-
-
-//        connect();
+        connect();
     }
 
     /**
@@ -57,8 +52,27 @@ public class Client {
     private void connect() {
         try {
             socket = new Socket(InetAddress.getByName(hostname), port);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            ObjectOutputStream outToServer = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream inFromServer = new ObjectInputStream(socket.getInputStream());
+
+
+            ArrayList<UserInfo> userInfos;
+
+            try {
+                while ((userInfos = (ArrayList<UserInfo>) inFromServer.readObject()) != null) {
+                    ArrayList<String> chunk = (ArrayList<String>) inFromServer.readObject();
+
+                    System.out.println(userInfos);
+                    System.out.println(chunk);
+                    ArrayList<UserInfoClearText> result = startCracking(userInfos, chunk);
+                    System.out.println(result);
+                    outToServer.writeObject(result);
+                    outToServer.flush();
+                }
+            } catch (Exception ex) {
+                //Not really a problem
+            }
+
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -86,7 +100,7 @@ public class Client {
         List<UserInfoClearText> partialResultUpperCase = checkSingleWord(userInfos, possiblePasswordUpperCase);
         result.addAll(partialResultUpperCase);
 
-        String possiblePasswordCapitalized = StringUtils.capitalize(dictionaryEntry);
+        String possiblePasswordCapitalized = StringUtilities.capitalize(dictionaryEntry);
         List<UserInfoClearText> partialResultCapitalized = checkSingleWord(userInfos, possiblePasswordCapitalized);
         result.addAll(partialResultCapitalized);
 
