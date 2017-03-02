@@ -1,6 +1,7 @@
-package dk.rhs.distributedpasswordcracking;
+package dk.easj.server;
 
-import dk.rhs.util.StringUtilities;
+import com.sun.xml.internal.ws.util.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,14 +16,15 @@ import java.util.logging.Logger;
 /**
  * Password cracking dictionary attack (a brute force algorithm)
  * Centralized, i.e. not distributed
+ *
  * @author andersb
  */
 public class CrackerCentralized {
 
-    private static MessageDigest messageDigest;
-    private static final Logger LOGGER = Logger.getLogger("passwordCracker");
+    private MessageDigest messageDigest;
+    private Logger LOGGER = Logger.getLogger("passwordCracker");
 
-    static {
+    {
         try {
             messageDigest = MessageDigest.getInstance("SHA");
         } catch (NoSuchAlgorithmException ex) {
@@ -34,23 +36,24 @@ public class CrackerCentralized {
     /**
      * Starts the password cracking program.
      * Writes the time used for cracking.
+     *
      * @param args the command line arguments, not used
      */
-    public static void main(final String[] args) throws IOException {
-        final long startTime = System.currentTimeMillis();
+    public void main(String[] args) throws IOException {
+        long startTime = System.currentTimeMillis();
 
-        final List<UserInfo> userInfos = PasswordFileHandler.readPasswordFile("passwords.txt");
-        final List<UserInfoClearText> result = new ArrayList<UserInfoClearText>();
+        List<UserInfo> userInfos = PasswordFileHandler.readPasswordFile("passwords.txt");
+        List<UserInfoClearText> result = new ArrayList<UserInfoClearText>();
         FileReader fileReader = null;
         try {
             fileReader = new FileReader("webster-dictionary.txt");
-            final BufferedReader dictionary = new BufferedReader(fileReader);
+            BufferedReader dictionary = new BufferedReader(fileReader);
             while (true) {
-                final String dictionaryEntry = dictionary.readLine();
+                String dictionaryEntry = dictionary.readLine();
                 if (dictionaryEntry == null) {
                     break;
                 }
-                final List<UserInfoClearText> partialResult = checkWordWithVariations(dictionaryEntry, userInfos);
+                List<UserInfoClearText> partialResult = checkWordWithVariations(dictionaryEntry, userInfos);
                 result.addAll(partialResult);
             }
         } finally {
@@ -58,8 +61,8 @@ public class CrackerCentralized {
                 fileReader.close();
             }
         }
-        final long endTime = System.currentTimeMillis();
-        final long usedTime = endTime - startTime;
+        long endTime = System.currentTimeMillis();
+        long usedTime = endTime - startTime;
         System.out.println(result);
         System.out.println("Used time: " + usedTime / 1000 + " seconds = " + usedTime / 60000.0 + " minutes");
     }
@@ -69,43 +72,43 @@ public class CrackerCentralized {
      * Tries different variations on the dictionary entry, like all uppercase, adding digits to the end of the entry, etc.
      *
      * @param dictionaryEntry a single word from a dictionary, i.e. a possible password
-     * @param userInfos a list of user information records: username + encrypted password
+     * @param userInfos       a list of user information records: username + encrypted password
      */
-    static List<UserInfoClearText> checkWordWithVariations(final String dictionaryEntry, final List<UserInfo> userInfos) {
-        final List<UserInfoClearText> result = new ArrayList<UserInfoClearText>();
+    List<UserInfoClearText> checkWordWithVariations(String dictionaryEntry, List<UserInfo> userInfos) {
+        List<UserInfoClearText> result = new ArrayList<UserInfoClearText>();
 
-        final String possiblePassword = dictionaryEntry;
-        final List<UserInfoClearText> partialResult = checkSingleWord(userInfos, possiblePassword);
+        String possiblePassword = dictionaryEntry;
+        List<UserInfoClearText> partialResult = checkSingleWord(userInfos, possiblePassword);
         result.addAll(partialResult);
 
-        final String possiblePasswordUpperCase = dictionaryEntry.toUpperCase();
-        final List<UserInfoClearText> partialResultUpperCase = checkSingleWord(userInfos, possiblePasswordUpperCase);
+        String possiblePasswordUpperCase = dictionaryEntry.toUpperCase();
+        List<UserInfoClearText> partialResultUpperCase = checkSingleWord(userInfos, possiblePasswordUpperCase);
         result.addAll(partialResultUpperCase);
 
-        final String possiblePasswordCapitalized = StringUtilities.capitalize(dictionaryEntry);
-        final List<UserInfoClearText> partialResultCapitalized  = checkSingleWord(userInfos, possiblePasswordCapitalized);
+        String possiblePasswordCapitalized = StringUtils.capitalize(dictionaryEntry);
+        List<UserInfoClearText> partialResultCapitalized = checkSingleWord(userInfos, possiblePasswordCapitalized);
         result.addAll(partialResultCapitalized);
 
-        final String possiblePasswordReverse = new StringBuilder(dictionaryEntry).reverse().toString();
-         final List<UserInfoClearText> partialResultReverse = checkSingleWord(userInfos, possiblePasswordReverse);
-         result.addAll(partialResultReverse);
+        String possiblePasswordReverse = new StringBuilder(dictionaryEntry).reverse().toString();
+        List<UserInfoClearText> partialResultReverse = checkSingleWord(userInfos, possiblePasswordReverse);
+        result.addAll(partialResultReverse);
 
         for (int i = 0; i < 100; i++) {
-            final String possiblePasswordEndDigit = dictionaryEntry + i;
-            final List<UserInfoClearText> partialResultEndDigit= checkSingleWord(userInfos, possiblePasswordEndDigit);
+            String possiblePasswordEndDigit = dictionaryEntry + i;
+            List<UserInfoClearText> partialResultEndDigit = checkSingleWord(userInfos, possiblePasswordEndDigit);
             result.addAll(partialResultEndDigit);
         }
 
         for (int i = 0; i < 100; i++) {
-            final String possiblePasswordStartDigit = i + dictionaryEntry;
-            final List<UserInfoClearText> partialResultStartDigit = checkSingleWord(userInfos, possiblePasswordStartDigit);
+            String possiblePasswordStartDigit = i + dictionaryEntry;
+            List<UserInfoClearText> partialResultStartDigit = checkSingleWord(userInfos, possiblePasswordStartDigit);
             result.addAll(partialResultStartDigit);
         }
 
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 100; j++) {
-                final String possiblePasswordStartEndDigit = i + dictionaryEntry + j;
-                final List<UserInfoClearText> partialResultStartEndDigit = checkSingleWord(userInfos, possiblePasswordStartEndDigit);
+                String possiblePasswordStartEndDigit = i + dictionaryEntry + j;
+                List<UserInfoClearText> partialResultStartEndDigit = checkSingleWord(userInfos, possiblePasswordStartEndDigit);
                 result.addAll(partialResultStartEndDigit);
             }
         }
@@ -115,13 +118,14 @@ public class CrackerCentralized {
 
     /**
      * Check a single  word (may include a single variation)from the dictionary against a list of encrypted passwords
-     * @param userInfos a list of user information records: username + encrypted password
+     *
+     * @param userInfos        a list of user information records: username + encrypted password
      * @param possiblePassword a single dictionary entry (may include a single variation)
      * @return the user information record, if the dictionary entry matches the users password, or {@code  null} if not.
      */
-    static List<UserInfoClearText> checkSingleWord(final List<UserInfo> userInfos, final String possiblePassword) {
-        final byte[] digest = messageDigest.digest(possiblePassword.getBytes());
-        final List<UserInfoClearText> results = new ArrayList<UserInfoClearText>();
+    List<UserInfoClearText> checkSingleWord(List<UserInfo> userInfos, String possiblePassword) {
+        byte[] digest = messageDigest.digest(possiblePassword.getBytes());
+        List<UserInfoClearText> results = new ArrayList<UserInfoClearText>();
         for (UserInfo userInfo : userInfos) {
             if (Arrays.equals(userInfo.getEntryptedPassword(), digest)) {
                 results.add(new UserInfoClearText(userInfo.getUsername(), possiblePassword));

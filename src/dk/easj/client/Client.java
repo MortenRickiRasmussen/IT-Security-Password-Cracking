@@ -22,6 +22,7 @@ public class Client {
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
+        connect(hostname, port);
     }
 
     /**
@@ -30,7 +31,7 @@ public class Client {
      * @param hostname
      * @param port
      */
-    public void connect(String hostname, int port, String clientName) {
+    public void connect(String hostname, int port) {
         try {
             socket = new Socket(InetAddress.getByName(hostname), port);
             out = new PrintWriter(socket.getOutputStream(), true);

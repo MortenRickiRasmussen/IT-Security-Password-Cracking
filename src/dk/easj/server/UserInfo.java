@@ -1,4 +1,4 @@
-package dk.rhs.distributedpasswordcracking;
+package dk.easj.server;
 
 import java.io.IOException;
 import java.io.Serializable;

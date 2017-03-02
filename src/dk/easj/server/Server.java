@@ -33,12 +33,13 @@ public class Server implements Runnable {
 
             while (running) {
                 Socket socket = serverSocket.accept();
+                System.out.println("Connectied");
                 Slave slave = new Slave(this, socket);
                 slave.start();
                 slaves.add(slave);
             }
         } catch (IOException ex) {
-            System.out.println(ex);
+            ex.printStackTrace();
         }
     }
 
@@ -56,4 +57,7 @@ public class Server implements Runnable {
         }
     }
 
+    public void something(){
+
+    }
 }
