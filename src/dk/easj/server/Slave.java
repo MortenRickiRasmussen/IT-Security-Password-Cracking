@@ -1,11 +1,11 @@
 package dk.easj.server;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by morty on 07-09-16.
@@ -13,29 +13,38 @@ import java.net.Socket;
 public class Slave extends Thread {
 
     private Socket socket;
-    private PrintWriter output;
-    private BufferedReader input;
+    private ObjectOutputStream output;
+    private ObjectInputStream input;
     private Server server;
 
     public Slave(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
 
-        this.output = new PrintWriter(socket.getOutputStream(), true);
-        this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.output = new ObjectOutputStream(socket.getOutputStream());
+        this.input = new ObjectInputStream(socket.getInputStream());
     }
 
     @Override
     public void run() {
-        String message;
+        Object message;
 
         try {
-            while ((message = input.readLine()) != null) {
-
+            while ((message = input.readObject()) != null) {
+                System.out.println(message);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             /*When socket closes an exception is thrown
             Therefore do nothing when that happens*/
+        }
+    }
+
+    public void getMessage(List message) {
+        try {
+            output.writeObject(message);
+            output.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
