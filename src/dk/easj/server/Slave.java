@@ -31,7 +31,8 @@ public class Slave extends Thread {
 
         try {
             while ((message = input.readObject()) != null) {
-                System.out.println(message);
+                server.addResult((ArrayList<UserInfoClearText>) message);
+                server.startSlave(this);
             }
         } catch (Exception e) {
             /*When socket closes an exception is thrown

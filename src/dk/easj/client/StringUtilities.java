@@ -1,4 +1,4 @@
-package dk.rhs.util;
+package dk.easj.client;
 
 /**
  * Various string utilities, not included in the class {@code String}

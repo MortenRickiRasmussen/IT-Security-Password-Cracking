@@ -1,5 +1,6 @@
 package dk.easj.client;
 
+import dk.easj.server.UserInfo;
 import sun.misc.BASE64Encoder;
 
 import java.io.BufferedReader;
@@ -61,7 +62,7 @@ public class PasswordFileHandler {
         try {
             fileReader = new FileReader(filename);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-            ArrayList<dk.easj.client.UserInfo> result = new ArrayList<dk.easj.client.UserInfo>();
+            ArrayList<UserInfo> result = new ArrayList<>();
             while (true) {
                 String line = bufferedReader.readLine();
                 if (line == null) {
