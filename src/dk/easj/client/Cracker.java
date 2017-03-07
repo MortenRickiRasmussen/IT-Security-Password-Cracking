@@ -35,6 +35,7 @@ public class Cracker implements Runnable {
         this.userInfos = userInfos;
         this.chunk = chunk;
         this.client = client;
+        System.out.println("I received "+chunk.size()+" lines");
     }
 
     @Override

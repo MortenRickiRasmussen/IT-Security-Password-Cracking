@@ -28,9 +28,12 @@ public class Server implements Runnable {
     private List<String> dictionary;
     private int linesSend = 0;
     private ArrayList<UserInfoClearText> result;
+    private long startTime;
+    private boolean done;
 
     public Server() {
         try {
+            done = false;
             slaves = new ArrayList<>();
             dictionary = new ArrayList<>();
             passwordFile = new ArrayList<>();
@@ -45,7 +48,14 @@ public class Server implements Runnable {
     public synchronized List<String> getChunk() {
         int linesToSend = 10000;
         this.linesSend += 10000;
-        return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.linesSend));
+        if (linesSend >= dictionary.size()) {
+            done = true;
+            System.out.println("Sent line "+(this.linesSend - linesToSend)+" to "+(this.dictionary.size()));
+            return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.dictionary.size()));
+        } else {
+            System.out.println("Sent line "+(this.linesSend - linesToSend)+" to "+(this.linesSend));
+            return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.linesSend));
+        }
     }
 
     public void run() {
@@ -59,9 +69,13 @@ public class Server implements Runnable {
             while (running) {
                 System.out.println("Connecting...");
                 Socket socket = serverSocket.accept();
+                if (startTime == 0){
+                    startTime = System.currentTimeMillis();
+                }
                 System.out.println("Connected");
                 Slave slave = new Slave(this, socket);
                 startSlave(slave);
+                slaves.add(slave);
                 slave.start();
             }
         } catch (IOException ex) {
@@ -70,23 +84,29 @@ public class Server implements Runnable {
     }
 
     public synchronized void startSlave(Slave slave) {
-        slave.getMessage(getChunk());
-        slave.getMessage(this.passwordFile);
-        slaves.add(slave);
+        if (done) {
+            try {
+                slave.disconnect();
+                slaves.remove(slave);
+                if (slaves.size() == 0){
+                    serverStop();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else {
+            ArrayList<String> chunk = (ArrayList<String>) getChunk();
+            slave.getMessage(chunk);
+            slave.getMessage(this.passwordFile);
+        }
     }
 
     public void serverStop() {
         running = false;
-
-        try {
-            for (Slave slave : slaves) {
-                slave.disconnect();
-            }
-            slaves.clear();
-            serverSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Found following results: "+result);
+        long endTime = System.currentTimeMillis();
+        long usedTime = endTime - startTime;
+        System.out.println("Used time: " + usedTime / 1000 + " seconds = " + usedTime / 60000.0 + " minutes");
     }
 
     public void readDictionary() throws IOException {
@@ -106,7 +126,7 @@ public class Server implements Runnable {
         }
     }
 
-    public synchronized void addResult(ArrayList<UserInfoClearText> result){
+    public synchronized void addResult(ArrayList<UserInfoClearText> result) {
         this.result.addAll(result);
     }
 
