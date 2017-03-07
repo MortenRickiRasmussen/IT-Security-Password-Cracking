@@ -1,9 +1,11 @@
 package dk.easj.server;
 
+import dk.easj.model.UserInfo;
+import dk.easj.model.UserInfoClearText;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;

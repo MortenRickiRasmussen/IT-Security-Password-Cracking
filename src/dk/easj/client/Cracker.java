@@ -1,6 +1,7 @@
 package dk.easj.client;
 
-import dk.easj.server.UserInfo;
+import dk.easj.model.UserInfoClearText;
+import dk.easj.model.UserInfo;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

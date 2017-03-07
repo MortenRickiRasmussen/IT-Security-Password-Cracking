@@ -1,4 +1,4 @@
-package dk.easj.client;
+package dk.easj.model;
 
 import java.io.Serializable;
 
