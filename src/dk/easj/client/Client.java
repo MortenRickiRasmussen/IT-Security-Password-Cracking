@@ -1,18 +1,13 @@
 package dk.easj.client;
 
-import dk.easj.server.UserInfo;
+import dk.easj.model.UserInfoClearText;
+import dk.easj.model.UserInfo;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Created by jakob on 02-03-17.

@@ -1,11 +1,11 @@
 package dk.easj.server;
 
-import javax.swing.*;
+import dk.easj.model.UserInfoClearText;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by morty on 07-09-16.

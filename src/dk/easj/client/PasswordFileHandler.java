@@ -1,6 +1,6 @@
 package dk.easj.client;
 
-import dk.easj.server.UserInfo;
+import dk.easj.model.UserInfo;
 import sun.misc.BASE64Encoder;
 
 import java.io.BufferedReader;
