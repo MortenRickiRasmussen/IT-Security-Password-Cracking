@@ -28,6 +28,7 @@ public class Server implements Runnable {
     private List<String> dictionary;
     private int linesSend = 0;
     private ArrayList<UserInfoClearText> result;
+    private int count = 0;
 
     public Server() {
         try {
@@ -45,8 +46,15 @@ public class Server implements Runnable {
     public synchronized List<String> getChunk() {
         int linesToSend = 10000;
         this.linesSend += 10000;
-        return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.linesSend));
+        if (linesSend > dictionary.size()) {
+            System.out.println(linesSend + " og " + count);
+            return  new ArrayList<>();
+        }else{
+            return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.linesSend));
+        }
     }
+
+
 
     public void run() {
         running = true;
@@ -70,9 +78,13 @@ public class Server implements Runnable {
     }
 
     public synchronized void startSlave(Slave slave) {
-        slave.getMessage(getChunk());
-        slave.getMessage(this.passwordFile);
-        slaves.add(slave);
+
+        List<String> chunk = getChunk();
+        if(chunk.size() > 0) {
+            slave.getMessage(getChunk());
+            slave.getMessage(this.passwordFile);
+            slaves.add(slave);
+        }
     }
 
     public void serverStop() {
@@ -97,6 +109,7 @@ public class Server implements Runnable {
             String line;
             while ((line = dictionary.readLine()) != null) {
                 this.dictionary.add(line);
+                count++;
             }
             System.out.println(this.dictionary.size());
         } finally {
