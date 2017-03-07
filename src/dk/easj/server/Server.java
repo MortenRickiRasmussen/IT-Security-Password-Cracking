@@ -28,9 +28,12 @@ public class Server implements Runnable {
     private List<String> dictionary;
     private int linesSend = 0;
     private ArrayList<UserInfoClearText> result;
+    private long startTime;
+    private boolean done;
 
     public Server() {
         try {
+            done = false;
             slaves = new ArrayList<>();
             dictionary = new ArrayList<>();
             passwordFile = new ArrayList<>();
@@ -45,10 +48,16 @@ public class Server implements Runnable {
     public synchronized List<String> getChunk() {
         int linesToSend = 10000;
         this.linesSend += 10000;
-        return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.linesSend));
+        if (linesSend >= dictionary.size()) {
+            done = true;
+            return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.dictionary.size()));
+        } else {
+            return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.linesSend));
+        }
     }
 
     public void run() {
+        startTime = System.currentTimeMillis();
         running = true;
 
         try {
@@ -62,6 +71,7 @@ public class Server implements Runnable {
                 System.out.println("Connected");
                 Slave slave = new Slave(this, socket);
                 startSlave(slave);
+                slaves.add(slave);
                 slave.start();
             }
         } catch (IOException ex) {
@@ -70,9 +80,15 @@ public class Server implements Runnable {
     }
 
     public synchronized void startSlave(Slave slave) {
+        if (done) {
+            try {
+                slave.disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         slave.getMessage(getChunk());
         slave.getMessage(this.passwordFile);
-        slaves.add(slave);
     }
 
     public void serverStop() {
@@ -106,7 +122,7 @@ public class Server implements Runnable {
         }
     }
 
-    public synchronized void addResult(ArrayList<UserInfoClearText> result){
+    public synchronized void addResult(ArrayList<UserInfoClearText> result) {
         this.result.addAll(result);
     }
 
