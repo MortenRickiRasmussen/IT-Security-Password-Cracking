@@ -64,8 +64,9 @@ public class Client {
                         thread.join();
                     }
                     if (!result.isEmpty()) {
-                        System.out.println("Found following results: " + result+"\n");
+                        System.out.println("Found following results: " + result);
                     }
+                    System.out.println("");
                     outToServer.writeObject(result);
                     outToServer.flush();
                     result = new ArrayList<>();

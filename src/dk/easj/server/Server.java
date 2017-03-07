@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Created by morty on 02-Mar-17.
@@ -17,7 +18,21 @@ import java.util.List;
 public class Server implements Runnable {
 
     public static void main(String[] args) {
-        Server server = new Server();
+        String passwordPath;
+        String dictionaryPath;
+
+        if (args.length > 0){
+            passwordPath = args[0];
+            dictionaryPath = args[1];
+        }else{
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Please enter the path to the password file");
+            passwordPath = scanner.nextLine();
+            System.out.println("Please enter the path to the dictionary file");
+            dictionaryPath = scanner.nextLine();
+        }
+
+        Server server = new Server(passwordPath, dictionaryPath);
         server.run();
     }
 
@@ -30,9 +45,13 @@ public class Server implements Runnable {
     private ArrayList<UserInfoClearText> result;
     private long startTime;
     private boolean done;
+    private String passwordPath;
+    private String dictionaryPath;
 
-    public Server() {
+    public Server(String passwordPath, String dictionaryPath) {
         try {
+            this.passwordPath = passwordPath;
+            this.dictionaryPath = dictionaryPath;
             done = false;
             slaves = new ArrayList<>();
             dictionary = new ArrayList<>();
@@ -112,7 +131,7 @@ public class Server implements Runnable {
     public void readDictionary() throws IOException {
         FileReader fileReader = null;
         try {
-            fileReader = new FileReader("webster-dictionary.txt");
+            fileReader = new FileReader(dictionaryPath);
             BufferedReader dictionary = new BufferedReader(fileReader);
             String line;
             while ((line = dictionary.readLine()) != null) {
@@ -134,7 +153,7 @@ public class Server implements Runnable {
     public void readPasswordFile() throws IOException {
         FileReader fileReader = null;
         try {
-            fileReader = new FileReader("passwords.txt");
+            fileReader = new FileReader(passwordPath);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             while (true) {
                 String line = bufferedReader.readLine();
