@@ -26,7 +26,7 @@ public class Server implements Runnable {
     private boolean running;
     private List<UserInfo> passwordFile;
     private List<String> dictionary;
-    private int linesSend = 300000;
+    private int linesSend = 0;
     private ArrayList<UserInfoClearText> result;
     private long startTime;
     private boolean done;
@@ -59,7 +59,6 @@ public class Server implements Runnable {
     }
 
     public void run() {
-        startTime = System.currentTimeMillis();
         running = true;
 
         try {
@@ -70,6 +69,9 @@ public class Server implements Runnable {
             while (running) {
                 System.out.println("Connecting...");
                 Socket socket = serverSocket.accept();
+                if (startTime == 0){
+                    startTime = System.currentTimeMillis();
+                }
                 System.out.println("Connected");
                 Slave slave = new Slave(this, socket);
                 startSlave(slave);
@@ -94,7 +96,6 @@ public class Server implements Runnable {
             }
         }else {
             ArrayList<String> chunk = (ArrayList<String>) getChunk();
-            System.out.println(chunk.get(chunk.size()-1));
             slave.getMessage(chunk);
             slave.getMessage(this.passwordFile);
         }
@@ -102,7 +103,10 @@ public class Server implements Runnable {
 
     public void serverStop() {
         running = false;
-        System.out.println(result);
+        System.out.println("Found following results: "+result);
+        long endTime = System.currentTimeMillis();
+        long usedTime = endTime - startTime;
+        System.out.println("Used time: " + usedTime / 1000 + " seconds = " + usedTime / 60000.0 + " minutes");
     }
 
     public void readDictionary() throws IOException {
