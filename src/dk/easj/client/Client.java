@@ -20,8 +20,6 @@ public class Client {
     private ArrayList<UserInfoClearText> result;
 
 
-
-
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
@@ -45,9 +43,16 @@ public class Client {
             try {
                 while ((chunk = (ArrayList<String>) inFromServer.readObject()) != null) {
                     ArrayList<UserInfo> userInfos = (ArrayList<UserInfo>) inFromServer.readObject();
-                    int steps = chunk.size()/threads.length;
+                    System.out.println("Received chunk: " + chunk.size() + " lines");
+                    int steps = chunk.size() / threads.length;
+                    System.out.println("Leftover after chunk split: "+chunk.size() % threads.length);
                     for (int i = 0; i < threads.length; i++) {
-                        ArrayList<String> bite = new ArrayList<>(chunk.subList(steps*i+1, steps*(i+1)));
+                        ArrayList<String> bite = new ArrayList<>();
+                        if (i == threads.length-1){
+                            bite = new ArrayList<>(chunk.subList(steps * i, chunk.size()));
+                        }else {
+                            bite = new ArrayList<>(chunk.subList(steps * i, steps * (i + 1)));
+                        }
                         Thread thread = new Thread(new Cracker(userInfos, bite, this));
                         threads[i] = thread;
                     }
@@ -58,14 +63,15 @@ public class Client {
                     for (Thread thread : threads) {
                         thread.join();
                     }
-
-                    System.out.println(result);
+                    if (!result.isEmpty()) {
+                        System.out.println("Found following results: " + result);
+                    }
                     outToServer.writeObject(result);
                     outToServer.flush();
                     result = new ArrayList<>();
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                System.out.println("Server closed connection");
             }
 
         } catch (UnknownHostException e) {
@@ -75,7 +81,7 @@ public class Client {
         }
     }
 
-    public synchronized void addResult(ArrayList<UserInfoClearText> result){
+    public synchronized void addResult(ArrayList<UserInfoClearText> result) {
         this.result.addAll(result);
     }
 

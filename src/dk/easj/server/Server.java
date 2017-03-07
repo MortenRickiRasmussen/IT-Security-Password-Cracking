@@ -26,7 +26,7 @@ public class Server implements Runnable {
     private boolean running;
     private List<UserInfo> passwordFile;
     private List<String> dictionary;
-    private int linesSend = 0;
+    private int linesSend = 300000;
     private ArrayList<UserInfoClearText> result;
     private long startTime;
     private boolean done;
@@ -50,8 +50,10 @@ public class Server implements Runnable {
         this.linesSend += 10000;
         if (linesSend >= dictionary.size()) {
             done = true;
+            System.out.println("Sent line "+(this.linesSend - linesToSend)+" to "+(this.dictionary.size()));
             return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.dictionary.size()));
         } else {
+            System.out.println("Sent line "+(this.linesSend - linesToSend)+" to "+(this.linesSend));
             return new ArrayList<>(dictionary.subList(this.linesSend - linesToSend, this.linesSend));
         }
     }
@@ -83,26 +85,24 @@ public class Server implements Runnable {
         if (done) {
             try {
                 slave.disconnect();
-            } catch (IOException e) {
+                slaves.remove(slave);
+                if (slaves.size() == 0){
+                    serverStop();
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+        }else {
+            ArrayList<String> chunk = (ArrayList<String>) getChunk();
+            System.out.println(chunk.get(chunk.size()-1));
+            slave.getMessage(chunk);
+            slave.getMessage(this.passwordFile);
         }
-        slave.getMessage(getChunk());
-        slave.getMessage(this.passwordFile);
     }
 
     public void serverStop() {
         running = false;
-
-        try {
-            for (Slave slave : slaves) {
-                slave.disconnect();
-            }
-            slaves.clear();
-            serverSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println(result);
     }
 
     public void readDictionary() throws IOException {
