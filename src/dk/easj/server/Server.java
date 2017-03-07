@@ -66,7 +66,7 @@ public class Server implements Runnable {
 
     public synchronized List<String> getChunk() {
         int linesToSend = 10000;
-        this.linesSend += 10000;
+        this.linesSend += linesToSend;
         if (linesSend >= dictionary.size()) {
             done = true;
             System.out.println("Sent line "+(this.linesSend - linesToSend)+" to "+(this.dictionary.size()));
